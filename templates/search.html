@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Taalweb - zoekresultaten voor eigenschap {{prop}}</title>
+	<link rel="stylesheet" href="../static/pico.classless.css">
+</head>
+<body>
+{% include 'header.html' %}
+<main>
+{% if prop %}
+<h1>Alle {{prop}}-woorden</h1>
+{% if words|length %}
+	<h2>Resultaten:</h2>
+	{% for word in words %}
+	    <a href="../woord/{{ word }}">{{ word }}</a><br>
+	{% endfor %}
+{% else %}
+	Geen resultaten...
+{% endif %}
+{% else %}
+
+<h1>Zoeken</h1>
+<p>
+	Dit is niet een normale zoekmachine, als je een woord invoert zul je weinig vinden. Het is een manier om woorden met bepaalde eigenschappen te vinden de eigenschappen die deze zoekmachine momenteel begrijpt zijn:
+</p>
+<ul>
+	<li><a href="./">
+</ul>
+
+<form>
+<input type="text" name="zoekopdracht">
+<button>Zoek</button>
+</form>
+
+{% endif %}
+</main>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Taalweb - {{word}}</title>
+	<link rel="stylesheet" href="../static/pico.classless.css">
+</head>
+<body>
+	{% include 'header.html' %}
+	<main>
+	{% if props  %}
+	<h1>{{word}}</h1>
+	{% for k,v in props.items() -%}
+		{% if v == True %}
+			<a href="../zoek/{{k}}">{{k}}</a>
+	    {% elif v -%}
+	    	<br>{{k}}: {% for word in v -%} <a href="./{{word}}">{{word}}</a> {% endfor %}
+	    {% endif %}
+	{%- endfor %}
+	<br>
+	<br>
+
+	{% if facts['anw'] != '0' %} <a href="https://anw.ivdnt.org/search?type=simple&q={{word}}"><img src="/static/anw.png" alt="Algemeen Nederlands Woordenboek"></a> {% endif %}
+	{% if facts['dvd'] != '0' %} <a href="https://www.vandale.nl/gratis-woordenboek/nederlands/betekenis/{{word}}"><img src="/static/dvd.png" alt="Dikke van Dale"></a> {% endif %}
+	{% if facts['groeneboekje'] != '0' %} <a href="https://woordenlijst.org/#/?q={{word}}"><img src="/static/groeneboekje.png" alt="Groene boekje"></a> {% endif %}
+	{% if facts['wiktionary'] != '0' %} <a href="https://nl.wiktionary.org/w/index.php?search={{word}}"><img src="/static/wiktionary.png" alt="Wiktionary"></a> {% endif %}
+	{% if facts['iate'] != '0' %} <a href="https://iate.europa.eu/search/standard"><img src="/static/iate.png" alt="IATE"></a> {% endif %}
+
+	<br>
+	{% if facts['generated'] %} Woord is genegereerd door software. <br> {% endif %}
+	{% if facts['corpus'] %} Woord staat in fora-corpus <br> {% endif %}
+	<br>
+
+	{% for k,v in facts.items() -%}
+		{{k}}: {{v}} <br>
+	{%- endfor %}
+	{% elif word %}
+	<h1>Kon {{word}} niet vinden de woordenlijst</h1>
+	{% else %}
+	Test
+	{% endif %}
+	</main>
+
+
+</body>
+</html>
