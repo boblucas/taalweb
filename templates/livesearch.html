@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Taalweb - zoekresultaten voor eigenschap {{prop}}</title>
+    <link rel="stylesheet" href="../static/pico.classless.css">
+    <style>
+    	form {
+		    display: flex;
+		    flex-wrap: wrap;
+		    gap: 1rem; /* Optional: Adds space between the fieldsets */
+		}
+
+		fieldset {
+		    flex: 1 1 300px; /* Adjust the 300px to the minimum width of each fieldset */
+		    min-width: 250px; /* This sets the minimum width for each fieldset */
+		    box-sizing: border-box; /* Ensures padding and borders are included in the width */
+		}
+    </style>
+    <script>
+        function updateSearchString() {
+            let queryParts = [];
+
+            // Handle 'is in dict' group
+            let isInDictGroup = [];
+            document.querySelectorAll('#sources input:checked').forEach(checkbox => {
+                isInDictGroup.push(checkbox.value);
+            });
+            if (isInDictGroup.length > 0) {
+                queryParts.push(`(${isInDictGroup.join('|')})`);
+            }
+
+            // Handle 'lipo' group
+            let lipoGroup = [];
+            document.querySelectorAll('#lipograms input:checked').forEach(checkbox => {
+                lipoGroup.push(checkbox.value);
+            });
+            if (lipoGroup.length > 0) {
+                queryParts.push(`(${lipoGroup.join('|')})`);
+            }
+
+            // Handle single property groups
+            document.querySelectorAll('#basic_properties input:checked').forEach(checkbox => {
+                queryParts.push(checkbox.value);
+            });
+
+            // Set the constructed DSL string in the search input
+            document.getElementById('zoekopdracht').value = queryParts.join('&');
+            fetchResults(document.getElementById('zoekopdracht').value, document.getElementById('sort_option').value);
+        }
+
+        function applySorting() {
+            let sortOption = document.querySelector('input[name="sort"]:checked').value;
+            document.getElementById('sort_option').value = sortOption;
+            fetchResults(document.getElementById('zoekopdracht').value, document.getElementById('sort_option').value);
+        }
+
+
+    </script>
+        <script>
+        function fetchResults(query, sort_option) {
+            if (query.length > 0) {
+                fetch(`/api/zoek/${encodeURIComponent(query)}/${encodeURIComponent(sort_option)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';  // Clear previous results
+                    if (data.length > 0) {
+                        data.forEach(word => {
+                            const link = document.createElement('a');
+                            link.href = `../woord/${word}`;
+                            link.textContent = word;
+                            resultsDiv.appendChild(link);
+                            resultsDiv.appendChild(document.createElement('br'));
+                        });
+                    } else {
+                        resultsDiv.innerHTML = 'Geen resultaten...';
+                    }
+                })
+                .catch(error => console.error('Error fetching search results:', error));
+            } else {
+                document.getElementById('results').innerHTML = '';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('zoekopdracht');
+            searchInput.addEventListener('input', function() {
+                fetchResults(this.value);
+            });
+
+            const sortInputs = document.querySelectorAll('input[name="sort"]');
+            sortInputs.forEach(sortInput => {
+                sortInput.addEventListener('change', applySorting);
+            });
+
+        });
+    </script>
+</head>
+<body>
+{% include 'header.html' %}
+<main>
+
+<h1>Zoeken</h1>
+<p>
+    Selecteer de eigenschappen om een zoekopdracht samen te stellen:
+</p>
+
+<form>
+    <!-- 'Is in Dict' Group -->
+    <fieldset id="sources">
+        <legend>Welke bronnen wil toestaan</legend>
+        <label><input type="checkbox" value="anw" onchange="updateSearchString()">ANW</label>
+        <label><input type="checkbox" value="dvd" onchange="updateSearchString()">DvD</label>
+        <label><input type="checkbox" value="groeneboekje" onchange="updateSearchString()">groeneboekje</label>
+        <label><input type="checkbox" value="wiktionary" onchange="updateSearchString()">wiktionary</label>
+        <label><input type="checkbox" value="iate" onchange="updateSearchString()">IATE</label>
+        <label><input type="checkbox" value="corpus" onchange="updateSearchString()">Corpus</label>
+        <label><input type="checkbox" value="generated" onchange="updateSearchString()">Gegenereerd</label>
+    </fieldset>
+
+    <!-- 'Lipo' Group -->
+    <fieldset id="lipograms">
+        <legend>Lipogrammen</legend>
+        <label><input type="checkbox" value="alipo" onchange="updateSearchString()">A</label>
+        <label><input type="checkbox" value="elipo" onchange="updateSearchString()">E</label>
+        <label><input type="checkbox" value="olipo" onchange="updateSearchString()">O</label>
+        <label><input type="checkbox" value="ulipo" onchange="updateSearchString()">U</label>
+        <label><input type="checkbox" value="ilipo" onchange="updateSearchString()">I</label>
+        <label><input type="checkbox" value="ijlipo" onchange="updateSearchString()">IJ</label>
+        <label><input type="checkbox" value="qwertylipo" onchange="updateSearchString()">QWERTY</label>
+        <label><input type="checkbox" value="asdflipo" onchange="updateSearchString()">ASDF</label>
+        <label><input type="checkbox" value="horizontalipo" onchange="updateSearchString()">BCDEHIKOX</label>
+        <label><input type="checkbox" value="verticalipo" onchange="updateSearchString()">AHIMOTUVWXY</label>
+        <label><input type="checkbox" value="stoklooslipo" onchange="updateSearchString()">stokloos</label>
+        <label><input type="checkbox" value="rekenmachinelipo" onchange="updateSearchString()">rekemachine</label>
+        <label><input type="checkbox" value="muzieklipo" onchange="updateSearchString()">abcdefg</label>
+    </fieldset>
+
+    <!-- Single Property Groups -->
+    <fieldset id="basic_properties">
+        <legend>Eigenschappen</legend>
+        <label><input type="checkbox" value="geordend" onchange="updateSearchString()">alfabetisch</label>
+        <label><input type="checkbox" value="zelfkeerwoord" onchange="updateSearchString()">palindroom</label>
+        <label><input type="checkbox" value="zelfhalfslag" onchange="updateSearchString()">180° symmetrisch</label>
+        <label><input type="checkbox" value="zelfkwartslag" onchange="updateSearchString()"> 90° symmetrisch</label>
+        <label><input type="checkbox" value="vierkant" onchange="updateSearchString()">woordvierkant</label>
+        <label><input type="checkbox" value="isogram" onchange="updateSearchString()">isogram</label>
+        <label><input type="checkbox" value="klinkerisogram" onchange="updateSearchString()">klinkerisogram</label>
+        <label><input type="checkbox" value="klinkerstapel" onchange="updateSearchString()">klinkerstapel</label>
+        <label><input type="checkbox" value="medeklinkerstapel" onchange="updateSearchString()">medeklinkerstapel</label>
+        <label><input type="checkbox" value="keerwoord" onchange="updateSearchString()">keerwoord</label>
+        <label><input type="checkbox" value="prefixstabiel" onchange="updateSearchString()">prefixstabiel</label>
+        <label><input type="checkbox" value="suffixstabiel" onchange="updateSearchString()">suffixstabiel</label>
+        <label><input type="checkbox" value="anagrammen" onchange="updateSearchString()">heeft anagrammen</label>
+        <label><input type="checkbox" value="rotaties" onchange="updateSearchString()">heeft rotaties</label>
+        <label><input type="checkbox" value="alfarotaties" onchange="updateSearchString()">caesarcijfer</label>
+        <label><input type="checkbox" value="alfaomkering" onchange="updateSearchString()">atbash</label>
+        <label><input type="checkbox" value="rits" onchange="updateSearchString()">ritswoorddeel</label>
+        <label><input type="checkbox" value="hypogram" onchange="updateSearchString()">hypogram</label>
+    </fieldset>
+
+        <!-- Sorting Options -->
+    <fieldset>
+        <legend>Sorteren</legend>
+        <label><input type="radio" name="sort" value="alphabetical" onchange="applySorting()"> Alfabetisch (A-Z)</label>
+        <label><input type="radio" name="sort" value="reverse_alphabetical" onchange="applySorting()"> Alfabetisch (Z-A)</label>
+        <label><input type="radio" name="sort" value="length" onchange="applySorting()"> Lengte (Kort-naar-lang)</label>
+        <label><input type="radio" name="sort" value="reverse_length" onchange="applySorting()"> Lengte (Lang-naar-kort)</label>
+    </fieldset>
+    <input type="hidden" id="sort_option" name="sort_option" value="alphabetical">
+
+    <input type="text" id="zoekopdracht" name="zoekopdracht" autocomplete="off">
+</form>
+
+<div id="results"></div>
+
+</main>
+</body>
+</html>

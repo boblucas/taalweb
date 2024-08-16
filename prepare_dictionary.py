@@ -1,5 +1,7 @@
-import sys, unicodedata
+import sys, unicodedata, re
 from collections import *
+import properties
+from util import *
 
 # we filteren alle echte onzin woorden
 # zoals met uitheemse letters of cijfers
@@ -41,7 +43,7 @@ load_dict('sources/dvd')
 load_dict('sources/wiktionary')
 load_dict('sources/iate')
 load_dict('sources/corpus')
-load_dict('sources/generated')
+#load_dict('sources/generated')
 
 for v in words.values():
 	v['spelling'] = ','.join(v['spelling'])
@@ -54,11 +56,23 @@ def has_symbols(w): return '-' in w or "'" in w
 def has_diacretics(w): return w.lower().replace('-', '').replace("'", '') == to_az(w)
 def is_perfect(w): return w == to_az(w)
 
+def syllables(w):
+	total = 0
+	for part in re.split(r'(?=[A-Z])|[-, ]', w):
+		part = part.lower()
+		part = ''.join(['a' if part[i] == 'y' and is_y_vowel(part, i) else part[i] for i in range(len(part))])
+		total += len(re.findall(r'[äëïöü]?[aeuioáéóíúàèùìòâêîôû]+', part))
+	return total
+
 print("Generating spellinginfo")
 for label, f in (('is_abbr', is_abbr), ('is_proper_noun', is_name), ('has_symbols', has_symbols), ('has_diacretics', has_diacretics), ('is_perfect', is_perfect)):
 	print('   ', label)
 	for k, props in words.items():
 		props[label] = '01'[all(f(w) for w in props['spelling'])]
+
+print('   syllables')
+for k, props in words.items():
+	props['syllables'] = str(syllables(props['spelling'].split(',')[0]))
 
 print("Loading additional properties")
 

@@ -17,10 +17,10 @@ number: /[0-9]+/
 %import common.WS
 %ignore WS''', start="all", parser="lalr")
 
-def get_comp_f(op, n):
-    if op == '=': return lambda w: len(w) == n
-    if op == '<': return lambda w: len(w) < n
-    if op == '>': return lambda w: len(w) > n
+def get_comp_f(op, f, n):
+    if op == '=': return lambda w: f(w) == n
+    if op == '<': return lambda w: f(w) < n
+    if op == '>': return lambda w: f(w) > n
 
 def load_label(cache, label):
     if label in cache.bool_cache:
@@ -31,7 +31,8 @@ def load_label(cache, label):
         a,b = label.split('_')
         if a in cache.group_cache and b in cache.group_cache[a]:
             return set(cache.group_cache[a][b])
-    return {}
+    
+    return set()
 
 def reduce_query(cache, tree):
     print(tree)
@@ -46,9 +47,12 @@ def reduce_query(cache, tree):
             label = child.children[0].children[0].value
             op = child.children[1].children[0].value
             n = int(child.children[2].children[0].value)
-            fop = get_comp_f(op, n)
+            fop = get_comp_f(op, len, n)
             if label == 'n':
                 state.append({w for w in cache.words if fop(w)})
+            elif label in next(iter(cache.words)):
+                s_op = get_comp_f(op, lambda w: int(cache.words[w][label]), n)
+                state.append({w for w in cache.words if s_op(w)})
             else:
                 state.append(set(sum([group for group in cache.group_cache[label].values() if fop(group)], [])))
         else:

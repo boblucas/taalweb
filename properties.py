@@ -25,7 +25,7 @@ def vierkant(w):
 	return False
 
 def isogram(w): return iso(w)
-def klinkerisogram(w): return len(set(vowels(w))) == 5 and iso(vowels(w)) > 0
+def klinkerisogram(w): return len(set(vowels(w))) == 5 and iso(vowels(w))
 
 def alipo(w): return is_lipo('a', vowels(w)) and 'a' in w
 def elipo(w): return is_lipo('e', vowels(w)) and 'e' in w
@@ -46,7 +46,7 @@ def klinkerstapel(w): return best_run(w, is_vowel, 4)
 def medeklinkerstapel(w): return best_run(w, lambda w,i: not is_vowel(w, i), 6)
 
 #UNARY_FUNCTIONS = [is_ordered, is_palindrome, is_rot180_sym, is_rot270_sym, is_transposable, is_1_isogram, is_2_isogram, is_3_isogram, is_vowel_isogram, is_a_lipo, is_e_lipo, is_o_lipo, is_u_lipo, is_i_lipo, is_ij_lipo, is_toprow_lipo, is_midrow_lipo, is_horizontal_lipo, is_vertical_lipo, is_baseline_lipo, is_number_lipo, is_music_lipo, is_rot90_valid, is_rot180_valid, is_rot270_valid, vowel_heap, consonant_heap]
-
+UNARY_FUNCTIONS = [geordend, zelfkeerwoord, zelfhalfslag, zelfkwartslag, vierkant, isogram, klinkerisogram, alipo, elipo, olipo, ulipo, ilipo, ijlipo, qwertylipo, asdflipo, horizontalipo, verticalipo, stoklooslipo, rekenmachinelipo, muzieklipo, klinkerstapel, medeklinkerstapel]
 
 # convert unary functions to correct format automatically
 def simple_properties(words):

@@ -4,26 +4,12 @@ import util
 from collections import *
 import re, csv
 
-# words is assumed to be a purely ^[a-z]*$ affair
-# in the future a CSV may be provided that maps such simplified
-# words back to their original spellings and source as metadata
-if __name__ == "__main__":
-    words = load_csv_dict(sys.argv[1])
-    out = {}
-    for f,_ in properties.functions.values():
-        print(f.__name__)
-        out |= f(words)
-
-    # ^rotaties_[a-z]+\t([a-z]* ){2,}
-    with open('wordcache', 'w') as f:
-        f.write('\n'.join(' '.join(k) + '\t' + ' '.join(v) for k,v in out.items()))
-
 # we have 3 types of labels
 # - singular labels apply to a word when it is part of that set
 # - dual labels with associated _repr function require a (label, repr(w)) lookup.
 # - dual labels with an integer value require a lookup in each of such labels
 
-# therefor we also create 3 associated caches in which we do our lookups
+# therefore we also create 3 associated caches in which we do our lookups
 # - label -> set cache
 # - label -> (repr(w) -> list)
 # - label -> (w -> int)
@@ -47,7 +33,7 @@ def load_cache(all_words_file, cache_file = 'wordcache'):
     words = load_csv_dict(all_words_file)
 
     print('loading primary cache')
-    bool_cache = {}
+    bool_cache = defaultdict(set)
     group_cache = defaultdict(dict)
     for line in open(cache_file):
         if not line or line.endswith('\t'): continue
@@ -59,6 +45,11 @@ def load_cache(all_words_file, cache_file = 'wordcache'):
             bool_cache[parts[0]] = set(content)
         elif len(parts) == 2:
             group_cache[parts[0]][parts[1]] = content
+
+    for w, p in words.items():
+        for k, v in p.items():
+            if re.match(r'^\d+$', v) and int(v):
+                bool_cache[k].add(w)
 
     print('creating secondary cache')
     # label[0] -> Counter(word -> amount of instances)
@@ -82,3 +73,17 @@ def get_properties(cache, w):
         out[k] = v[wkey] if wkey in v else []
 
     return out
+
+# words is assumed to be a purely ^[a-z]*$ affair
+# in the future a CSV may be provided that maps such simplified
+# words back to their original spellings and source as metadata
+if __name__ == "__main__":
+    words = load_csv_dict(sys.argv[1])
+    out = {}
+    for f,_ in properties.functions.values():
+        print(f.__name__)
+        out |= f(words)
+
+    # ^rotaties_[a-z]+\t([a-z]* ){2,}
+    with open('wordcache', 'w') as f:
+        f.write('\n'.join(' '.join(k) + '\t' + ' '.join(v) for k,v in out.items()))
